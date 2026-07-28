@@ -96,6 +96,7 @@ jobs:
           -w ${{ github.workspace }} \
           -e IMAGE_NAME=${IMAGE#*:} \
           -e CUDA_VISIBLE_DEVICES=3 \
+          -e HSA_NO_SCRATCH_RECLAIM=1 \
           $IMAGE \
           ${{ github.workspace }}/rtp-llm/rtp_llm_benchmark/ci/run_rtp_unittest.sh
 
@@ -154,6 +155,7 @@ jobs:
           -w ${{ github.workspace }} \
           -e IMAGE_NAME=${IMAGE#*:} \
           -e CUDA_VISIBLE_DEVICES=4,5,6,7 \
+          -e HSA_NO_SCRATCH_RECLAIM=1 \
           $IMAGE \
           ${{ github.workspace }}/rtp-llm/rtp_llm_benchmark/ci/run_rtp_e2etests.sh
 
