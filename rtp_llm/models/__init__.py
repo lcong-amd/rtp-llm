@@ -46,20 +46,34 @@ from .qwen_v3_moe import Qwen3Moe
 if has_internal_source():
     import internal_source.rtp_llm.models.internal_init
 
-import os 
 import logging
 import importlib
-from rtp_llm.utils.import_util import load_module
+import sys
 
-def _get_csv_env_values(env_name: str):
-    raw_value = os.getenv(env_name, "")
+
+def _split_csv_values(raw_value: str):
     if not raw_value:
         return []
     return [item.strip() for item in raw_value.split(",") if item.strip()]
-    
-def _load_external_models_from_env() -> None:
+
+
+def _get_csv_arg_values(arg_name: str):
+    option_name = f"--{arg_name}"
+    argv = sys.argv[1:]
+
+    for idx, token in enumerate(argv):
+        if token == option_name:
+            if idx + 1 >= len(argv):
+                return []
+            return _split_csv_values(argv[idx + 1])
+        if token.startswith(f"{option_name}="):
+            return _split_csv_values(token.split("=", 1)[1])
+    return []
+
+
+def _load_external_models_from_args() -> None:
     # atom.plugin.rtp_llm.models
-    external_modules = _get_csv_env_values("RTP_LLM_EXTERNAL_MODEL_PACKAGES")
+    external_modules = _get_csv_arg_values("external_model_packages")
     for module_name in external_modules:
         logging.info("loading external model module: %s", module_name)
         try:
@@ -68,15 +82,5 @@ def _load_external_models_from_env() -> None:
             raise RuntimeError(
                 f"failed to import external model module [{module_name}]: {e}"
             ) from e
-    
-    external_files = _get_csv_env_values("RTP_LLM_EXTERNAL_MODEL_FILES")
-    for module_file in external_files:
-        logging.info("loading external model file: %s", module_file)
-        try:
-            load_module(module_file)
-        except Exception as e:
-            raise RuntimeError(
-                f"failed to import external model file [{module_file}]: {e}"
-            ) from e
 
-_load_external_models_from_env()
+_load_external_models_from_args()

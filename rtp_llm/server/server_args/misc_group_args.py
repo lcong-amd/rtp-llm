@@ -65,3 +65,10 @@ def init_misc_group_args(parser, misc_config):
         default="EMPTY",
         help="OpenAI API Key",
     )
+
+    misc_group.add_argument(
+        "--external_model_packages",
+        type=str,
+        default=None,
+        help="Comma-separated extra model package modules to import at startup",
+    )
